@@ -1,0 +1,62 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: spring-rocketmq
+  
+  datasource:
+    url: jdbc:h2:mem:ecommerce
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  rocketmq:
+    name-server: localhost:9876
+    producer:
+      group: producer-group
+      send-timeout: 3000
+      max-message-size: 4194304
+      retry-times-when-send-async-failed: 2
+      retry-next-server: true
+    consumer:
+      group: consumer-group
+      max-reconsume-times: 3
+      consume-thread-min: 20
+      consume-thread-max: 64
+      consume-message-batch-max-size: 1
+
+# RocketMQ Topics
+rocketmq:
+  topic:
+    order: order-topic
+    payment: payment-topic
+    order-timeout: order-timeout-topic
+    dlq: DLQ
+    
+  consumer:
+    order:
+      topic: ${rocketmq.topic.order}
+      tag: ORDER_*
+    payment:
+      topic: ${rocketmq.topic.payment}
+      tag: PAYMENT_*
+    timeout:
+      topic: ${rocketmq.topic.order-timeout}
+      
+logging:
+  level:
+    com.ecommerce: DEBUG
+    org.apache.rocketmq: INFO

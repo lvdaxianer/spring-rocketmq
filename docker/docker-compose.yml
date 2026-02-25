@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  nameserver:
+    image: apache/rocketmq:5.1.4
+    container_name: rocketmq-nameserver
+    command: sh mqnamesrv
+    ports:
+      - 9876:9876
+    networks:
+      - rocketmq-network
+    volumes:
+      - nameserver-data:/home/rocketmq/data
+
+  broker:
+    image: apache/rocketmq:5.1.4
+    container_name: rocketmq-broker
+    command: sh mqbroker -n nameserver:9876 -c /home/rocketmq/broker.conf
+    ports:
+      - 10911:10911
+      - 10909:10909
+    depends_on:
+      - nameserver
+    networks:
+      - rocketmq-network
+    volumes:
+      - broker-data:/home/rocketmq/data
+    environment:
+      - JAVA_OPTS=-Duser.home=/home/rocketmq
+      - NAMESRV_ADDR=nameserver:9876
+
+  console:
+    image: apache/rocketmq-dashboard:latest
+    container_name: rocketmq-console
+    ports:
+      - 8080:8080
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=nameserver:9876
+      - SERVER_PORT=8080
+    depends_on:
+      - nameserver
+      - broker
+    networks:
+      - rocketmq-network
+
+networks:
+  rocketmq-network:
+    driver: bridge
+
+volumes:
+  nameserver-data:
+  broker-data:
