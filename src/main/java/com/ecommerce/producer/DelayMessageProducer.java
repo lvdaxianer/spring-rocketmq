@@ -37,8 +37,7 @@ public class DelayMessageProducer {
     public void sendDelayMessage(OrderTimeoutMessage message, int delayLevel) {
         try {
             String json = objectMapper.writeValueAsString(message);
-            Message rocketMsg = new Message(orderTimeoutTopic, "ORDER_TIMEOUT", 
-                                          message.getOrderId().getBytes(), json.getBytes());
+            Message rocketMsg = new Message(orderTimeoutTopic, "ORDER_TIMEOUT", json.getBytes());
             
             // 设置延迟级别
             rocketMsg.setDelayTimeLevel(delayLevel);

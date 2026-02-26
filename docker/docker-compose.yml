@@ -30,7 +30,7 @@ services:
       - NAMESRV_ADDR=nameserver:9876
 
   console:
-    image: apache/rocketmq-dashboard:latest
+    image: apacherocketmq/rocketmq-dashboard:latest
     container_name: rocketmq-console
     ports:
       - 8080:8080

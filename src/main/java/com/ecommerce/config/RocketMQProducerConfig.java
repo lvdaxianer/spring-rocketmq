@@ -36,7 +36,6 @@ public class RocketMQProducerConfig {
         producer.setSendMsgTimeout(sendTimeout);
         producer.setMaxMessageSize(maxMessageSize);
         producer.setRetryTimesWhenSendAsyncFailed(2);
-        producer.setRetryNextServer(true);
         
         try {
             producer.start();

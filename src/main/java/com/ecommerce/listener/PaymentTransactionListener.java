@@ -81,7 +81,7 @@ public class PaymentTransactionListener implements TransactionListener {
                         } else {
                             log.info("Transaction unknown: orderId={}, status={}", 
                                     orderId, order.getStatus());
-                            return LocalTransactionState.UNKNOWN;
+                            return LocalTransactionState.COMMIT_MESSAGE;
                         }
                     })
                     .orElseGet(() -> {
@@ -91,7 +91,7 @@ public class PaymentTransactionListener implements TransactionListener {
                     
         } catch (Exception e) {
             log.error("Failed to check local transaction", e);
-            return LocalTransactionState.UNKNOWN;
+            return LocalTransactionState.ROLLBACK_MESSAGE;
         }
     }
 }

@@ -35,8 +35,7 @@ public class OrderProducer {
     public void sendOrderCreatedMessage(OrderCreatedMessage message) {
         try {
             String json = objectMapper.writeValueAsString(message);
-            Message rocketMsg = new Message(orderTopic, "ORDER_CREATED", 
-                                          message.getOrderId().getBytes(), json.getBytes());
+            Message rocketMsg = new Message(orderTopic, "ORDER_CREATED", json.getBytes());
             
             // 使用订单ID作为sharding key，保证同一订单的消息发往同一队列
             defaultMQProducer.send(rocketMsg, new MessageQueueSelector() {
@@ -62,8 +61,7 @@ public class OrderProducer {
     public void sendOrderCreatedMessageSync(OrderCreatedMessage message) {
         try {
             String json = objectMapper.writeValueAsString(message);
-            Message rocketMsg = new Message(orderTopic, "ORDER_CREATED", 
-                                          message.getOrderId().getBytes(), json.getBytes());
+            Message rocketMsg = new Message(orderTopic, "ORDER_CREATED", json.getBytes());
             
             defaultMQProducer.send(rocketMsg);
             log.info("Order created message sent synchronously: orderId={}", message.getOrderId());
@@ -79,8 +77,7 @@ public class OrderProducer {
     public void sendOrderCreatedMessageAsync(OrderCreatedMessage message) {
         try {
             String json = objectMapper.writeValueAsString(message);
-            Message rocketMsg = new Message(orderTopic, "ORDER_CREATED", 
-                                          message.getOrderId().getBytes(), json.getBytes());
+            Message rocketMsg = new Message(orderTopic, "ORDER_CREATED", json.getBytes());
             
             defaultMQProducer.send(rocketMsg, new org.apache.rocketmq.client.producer.SendCallback() {
                 @Override

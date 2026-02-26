@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
+import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -38,23 +39,27 @@ public class OrderTimeoutConsumer {
         try {
             defaultMQPushConsumer.subscribe(orderTimeoutTopic, "ORDER_TIMEOUT");
             
-            defaultMQPushConsumer.registerMessageListener((msgs, context) -> {
-                for (MessageExt msg : msgs) {
-                    try {
-                        String body = new String(msg.getBody());
-                        OrderTimeoutMessage timeoutMessage = objectMapper.readValue(body, OrderTimeoutMessage.class);
-                        
-                        log.info("Received order timeout message: orderId={}, msgId={}", 
-                                timeoutMessage.getOrderId(), msg.getMsgId());
-                        
-                        processOrderTimeoutMessage(timeoutMessage);
-                        
-                    } catch (Exception e) {
-                        log.error("Failed to process timeout message: msgId={}", msg.getMsgId(), e);
-                        return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+            defaultMQPushConsumer.registerMessageListener(new MessageListenerConcurrently() {
+                @Override
+                public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, 
+                        ConsumeConcurrentlyContext context) {
+                    for (MessageExt msg : msgs) {
+                        try {
+                            String body = new String(msg.getBody());
+                            OrderTimeoutMessage timeoutMessage = objectMapper.readValue(body, OrderTimeoutMessage.class);
+                            
+                            log.info("Received order timeout message: orderId={}, msgId={}", 
+                                    timeoutMessage.getOrderId(), msg.getMsgId());
+                            
+                            processOrderTimeoutMessage(timeoutMessage);
+                            
+                        } catch (Exception e) {
+                            log.error("Failed to process timeout message: msgId={}", msg.getMsgId(), e);
+                            return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+                        }
                     }
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                 }
-                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             });
             
             defaultMQPushConsumer.start();

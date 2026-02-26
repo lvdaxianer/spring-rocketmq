@@ -33,8 +33,7 @@ public class TransactionOrderProducer {
                                                         Object transactionExecutor) {
         try {
             String json = objectMapper.writeValueAsString(message);
-            Message rocketMsg = new Message(paymentTopic, "PAYMENT_SUCCESS", 
-                                          message.getOrderId().getBytes(), json.getBytes());
+            Message rocketMsg = new Message(paymentTopic, "PAYMENT_SUCCESS", json.getBytes());
             
             TransactionSendResult result = transactionMQProducer.sendMessageInTransaction(rocketMsg, transactionExecutor);
             log.info("Transaction message sent: paymentId={}, orderId={}, status={}", 

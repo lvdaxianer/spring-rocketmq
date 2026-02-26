@@ -3,6 +3,8 @@ package com.ecommerce.service;
 import com.ecommerce.model.Order;
 import com.ecommerce.model.OrderStatus;
 import com.ecommerce.model.message.OrderCreatedMessage;
+import com.ecommerce.model.message.OrderTimeoutMessage;
+import com.ecommerce.producer.DelayMessageProducer;
 import com.ecommerce.repository.OrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ObjectMapper objectMapper;
+    private final DelayMessageProducer delayMessageProducer;
 
     /**
      * 创建订单
@@ -128,5 +131,25 @@ public class OrderService {
         message.setCreatedAt(System.currentTimeMillis());
         message.setTags("ORDER_CREATED");
         return message;
+    }
+
+    /**
+     * 发送订单超时延迟消息
+     * @param orderId 订单ID
+     * @param delayLevel 延迟级别 (1-18)
+     *                   1: 1秒  2: 5秒  3: 10秒  4: 30秒
+     *                   5: 1分钟 6: 2分钟 7: 3分钟 8: 4分钟
+     *                   9: 5分钟 10: 6分钟 11: 8分钟 12: 10分钟
+     *                   13: 20分钟 14: 30分钟 15: 1小时 16: 2小时
+     */
+    public void sendOrderTimeoutMessage(String orderId, int delayLevel) {
+        OrderTimeoutMessage message = new OrderTimeoutMessage();
+        message.setOrderId(orderId);
+        message.setTimeoutType("ORDER_PAYMENT_TIMEOUT");
+        message.setCreatedAt(System.currentTimeMillis());
+        message.setTags("ORDER_TIMEOUT");
+        
+        delayMessageProducer.sendDelayMessage(message, delayLevel);
+        log.info("Order timeout message sent: orderId={}, delayLevel={}", orderId, delayLevel);
     }
 }
