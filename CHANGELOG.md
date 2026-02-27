@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Changed
+- 更新CHANGELOG日志 (e47977f)
+
 - 添加RocketMQ 20个架构师面试要点及代码实现 (812b881)
 
 ### Changed
